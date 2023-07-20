@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/Storage.sol": {
+      "content": "//SPDX-License-Identifier:MIT\r\npragma solidity 0.8.15;\r\n\r\ncontract Storage {\r\n  /* State variables */\r\n  mapping(address => string[]) private files;\r\n  mapping(address => mapping(address => bool)) private accessAllowance;\r\n\r\n  /* Store Function  */\r\n  function addFile(string memory _url) external {\r\n    require(bytes(_url).length > 0, \"invalid url\");\r\n    files[msg.sender].push(_url);\r\n  }\r\n\r\n  function getFiles(address _user) external view returns (string[] memory) {\r\n    require(msg.sender == _user || accessAllowance[msg.sender][_user]);\r\n    return files[msg.sender];\r\n  }\r\n\r\n  function grantAccess(address _user) external onlyOwner {\r\n    require(_user != address(0), \"Invalid viewer address\");\r\n    accessAllowance[msg.sender][_user] = true;\r\n  }\r\n\r\n  modifier onlyOwner() {\r\n    require(\r\n      files[msg.sender].length > 0,\r\n      \"Only file owner can perform this action\"\r\n    );\r\n    _;\r\n  }\r\n\r\n  function revokeAccess(address viewer) external onlyOwner {\r\n    require(viewer != address(0), \"Invalid viewer address\");\r\n    accessAllowance[msg.sender][viewer] = false;\r\n  }\r\n}\r\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

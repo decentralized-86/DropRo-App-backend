@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/Storage.sol": {
+      "content": "//SPDX-License-Identifier:MIT\r\npragma solidity 0.8.15;\r\n\r\ncontract Storage {\r\n    struct Data{\r\n        string name;\r\n        string ipfsHash;\r\n        address owner;\r\n    }\r\n    /* State variables */\r\n    mapping(string=>Data) private data;\r\n    mapping(address=>bool) allowed;\r\n    /* Events */\r\n    event dataAdded(string  indexed _name);\r\n    event accessAuthorized(string  indexed _name,address indexed _allowedAddress);\r\n    event accessRevoked(string  indexed _name,address indexed _allowedAddress);\r\n    /*   addData()    */\r\n    function addData(string memory _name,string memory _ipfsHash) external {\r\n        require(bytes(_name).length > 0,\"invalid\");\r\n        require(bytes(_ipfsHash).length > 0,\"invalid\");\r\n        require(data[_name].owner == address(0),\"Data With this address and name already exists\");\r\n        data[_name] = Data(_name,_ipfsHash,msg.sender);\r\n        emit dataAdded(_name);\r\n    }\r\n    /*   getData()    */\r\n    function getData(string memory _name) external view  returns(string memory){\r\n        require(bytes(_name).length > 0,\"invalid input\");\r\n        require(data[_name].owner != address(0),\"data with this name does not exists\");\r\n        require(data[_name].owner == msg.sender || allowed[msg.sender],\"only allowed or the owner is permitted\");\r\n        return (data[_name].ipfsHash);\r\n    }\r\n    /*   authorizeAccess()    */\r\n    function authorizeAccess(string memory _name,address _address) external {\r\n        require(data[_name].owner == msg.sender,\"Only owner can grant the access\");\r\n        allowed[_address] = true;\r\n        emit accessAuthorized(_name,_address);\r\n    }\r\n    /*   revokeAccess()    */\r\n    function revokeAccess(string memory _name,address _address) external {\r\n        require(data[_name].owner == msg.sender,\"Only owner can revoke the access\");\r\n        allowed[_address] = false;\r\n        emit accessRevoked(_name,_address);\r\n    }\r\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
